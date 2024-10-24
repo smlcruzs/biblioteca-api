@@ -14,5 +14,5 @@ Este projeto é uma API simples para gerenciar livros e usuários de uma bibliot
 ### 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
-cd nome-do-repositorio
+git clone [https://github.com/smlcruzs/biblioteca-api]
+cd biblioteca-api
