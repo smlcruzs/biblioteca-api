@@ -11,7 +11,7 @@ This project is a simple API for managing books and users of a library, built wi
 
 ## How to run the project locally
 
-### 1. Clone the repository:
+### 1. Clone the repository: 
 
 ```bash
 git clone [https://github.com/smlcruzs/library-api]
