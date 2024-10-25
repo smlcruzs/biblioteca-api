@@ -1,18 +1,18 @@
-# Biblioteca API com Django REST
+# Django REST API Library
 
-Este projeto é uma API simples para gerenciar livros e usuários de uma biblioteca, construída com o Django REST Framework.
+This project is a simple API for managing books and users of a library, built with the Django REST Framework.
 
-## Funcionalidades
+## Features
 
-- **GET**: Listar livros e usuários.
-- **POST**: Adicionar novos livros e usuários.
-- **PUT**: Atualizar informações dos livros e usuários.
-- **DELETE**: Remover livros e usuários.
+- **GET**: List books and users.
+- **POST**: Add new books and users.
+- **PUT**: Update book and user information.
+- **DELETE**: Remove books and users.
 
-## Como executar o projeto localmente
+## How to run the project locally
 
-### 1. Clone o repositório:
+### 1. Clone the repository:
 
 ```bash
-git clone [https://github.com/smlcruzs/biblioteca-api]
-cd biblioteca-api
+git clone [https://github.com/smlcruzs/library-api]
+cd library-api
