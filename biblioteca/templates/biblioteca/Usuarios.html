@@ -1,0 +1,228 @@
+{% extends 'biblioteca/base.html' %}
+{% block title %}Membros{% endblock %}
+{% block nav_usuarios %}active{% endblock %}
+
+{% block guided_banner %}
+<div class="guided-banner">
+  <div class="guided-banner-inner">
+    <div class="guided-banner-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <div class="guided-banner-text">
+      <strong>Gestão de Membros</strong>
+      <span>Cadastre membros primeiro. Apenas membros cadastrados podem adicionar livros ao acervo.</span>
+    </div>
+    <div class="guided-banner-actions">
+      <a href="/livros/" class="guided-btn guided-btn-outline">Ver acervo</a>
+      <a href="/emprestimos/" class="guided-btn guided-btn-outline">Empréstimos</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block hero %}
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <p class="eyebrow">Gestão de Membros</p>
+    <h1>Leitores <em>Cadastrados</em></h1>
+    <p class="subtitle">Gerencie os membros da biblioteca. Só membros podem adicionar livros.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .tabela-wrap { background:white; border:1px solid var(--border); border-radius:2px; overflow:hidden; box-shadow:0 2px 12px var(--shadow); }
+  table { width:100%; border-collapse:collapse; }
+  thead { background:var(--ink); }
+  thead th { padding:13px 16px; font-size:10px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.5); text-align:left; }
+  tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:var(--cream); }
+  tbody td { padding:13px 16px; font-size:14px; color:var(--ink); vertical-align:middle; }
+  .avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; flex-shrink:0; }
+  @media (max-width:640px) { .col-data,.col-stats { display:none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" class="search-input" id="search-input" placeholder="Buscar por nome ou e-mail…" />
+  </div>
+  <button class="btn btn-primary" onclick="abrirModal()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Novo Membro
+  </button>
+</div>
+
+<div id="loading" style="display:flex;align-items:center;gap:10px;color:var(--ink-muted);font-size:14px;padding:2rem 0;">
+  <div class="loading-spinner"></div> Carregando membros...
+</div>
+
+<div id="empty-state" style="display:none;text-align:center;padding:4rem 2rem;">
+  <p style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--ink-muted);">Nenhum membro encontrado</p>
+</div>
+
+<div class="tabela-wrap" id="tabela-wrap" style="display:none;">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:36px;">#</th>
+        <th>Membro</th>
+        <th>E-mail</th>
+        <th class="col-stats">Livros</th>
+        <th class="col-stats">Emprést.</th>
+        <th class="col-data">Cadastrado</th>
+        <th style="text-align:right;">Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<!-- MODAL CRIAR/EDITAR -->
+<div class="modal-backdrop" id="modal" onclick="fecharModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Novo Membro</h2>
+      <button class="modal-close" onclick="fecharModal(null,true)">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-alert" style="display:none;" class="alert"></div>
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-control" id="f-nome" type="text" placeholder="Nome do leitor" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-control" id="f-email" type="email" placeholder="email@exemplo.com" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal(null,true)">Cancelar</button>
+      <button class="btn btn-teal" id="btn-salvar" onclick="salvar()">Salvar Membro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal-backdrop" id="modal-delete" onclick="fecharDelete(event)">
+  <div class="modal" style="max-width:380px;border-top-color:var(--rust);">
+    <div class="modal-header">
+      <h2 class="modal-title" style="font-size:1.1rem;">Confirmar Exclusão</h2>
+      <button class="modal-close" onclick="fecharDelete(null,true)">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--ink-muted);line-height:1.7;">Deseja remover o membro <strong id="delete-nome" style="color:var(--ink);"></strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharDelete(null,true)">Cancelar</button>
+      <button class="btn btn-danger" id="btn-delete" onclick="confirmarDelete()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const API = '/api/usuarios/';
+  let cache = [], editandoId = null, deletandoId = null;
+  const CORES = ['#1D5C5C','#8B6914','#7A3B1E','#2A4B7A','#5A3A7A','#1D5C3A'];
+
+  function getCookie(name) { let v=null; if(document.cookie) document.cookie.split(';').forEach(c=>{c=c.trim();if(c.startsWith(name+'='))v=decodeURIComponent(c.slice(name.length+1));}); return v; }
+  function initials(nome) { return nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase(); }
+  function fmtDate(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}); }
+
+  async function carregar() {
+    const res = await fetch(API);
+    const data = await res.json();
+    cache = data.results || data;
+    document.getElementById('loading').style.display='none';
+    render(cache);
+  }
+
+  function render(lista) {
+    const tbody = document.getElementById('tbody');
+    const tabela = document.getElementById('tabela-wrap');
+    const empty = document.getElementById('empty-state');
+    if (!lista.length) { tabela.style.display='none'; empty.style.display='block'; return; }
+    empty.style.display='none'; tabela.style.display='block';
+    tbody.innerHTML = lista.map(u => `
+      <tr>
+        <td style="color:var(--ink-muted);font-size:12px;">${u.id}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:11px;">
+            <div class="avatar" style="background:${CORES[u.id % CORES.length]};">${initials(u.nome)}</div>
+            <span style="font-weight:700;">${u.nome}</span>
+          </div>
+        </td>
+        <td style="color:var(--ink-muted);font-size:13px;">${u.email}</td>
+        <td class="col-stats"><span class="badge badge-gold">${u.total_livros ?? '—'}</span></td>
+        <td class="col-stats"><span class="badge badge-teal">${u.total_emprestimos ?? '—'}</span></td>
+        <td class="col-data" style="color:var(--ink-muted);font-size:12px;">${fmtDate(u.data_cadastro)}</td>
+        <td style="text-align:right;">
+          <div style="display:inline-flex;gap:6px;">
+            <button class="btn btn-outline" style="padding:5px 11px;font-size:9px;" onclick="editar(${u.id})">Editar</button>
+            <button class="btn btn-danger" style="padding:5px 11px;font-size:9px;" onclick="pedirDelete(${u.id},'${u.nome.replace(/'/g,"\\'")}')">Excluir</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('search-input').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    render(cache.filter(u => u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
+  });
+
+  function abrirModal(id=null) {
+    editandoId = id;
+    document.getElementById('modal-alert').style.display='none';
+    if (id) {
+      const u = cache.find(x=>x.id===id);
+      document.getElementById('modal-title').textContent='Editar Membro';
+      document.getElementById('f-nome').value=u.nome;
+      document.getElementById('f-email').value=u.email;
+    } else {
+      document.getElementById('modal-title').textContent='Novo Membro';
+      document.getElementById('f-nome').value='';
+      document.getElementById('f-email').value='';
+    }
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function fecharModal(e,force=false) { if(force||e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); }
+  function editar(id) { abrirModal(id); }
+
+  async function salvar() {
+    const nome=document.getElementById('f-nome').value.trim();
+    const email=document.getElementById('f-email').value.trim();
+    const alertEl=document.getElementById('modal-alert');
+    if(!nome||!email){alertEl.className='alert alert-danger';alertEl.textContent='Nome e e-mail são obrigatórios.';alertEl.style.display='block';return;}
+    const btn=document.getElementById('btn-salvar');
+    btn.textContent='Salvando…';btn.disabled=true;
+    try {
+      const res=await fetch(editandoId?`${API}${editandoId}/`:API,{method:editandoId?'PUT':'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({nome,email})});
+      if(res.ok){fecharModal(null,true);carregar();}
+      else{const err=await res.json();alertEl.className='alert alert-danger';alertEl.textContent=Object.values(err).flat().join(' ');alertEl.style.display='block';}
+    }catch(e){alertEl.className='alert alert-danger';alertEl.textContent='Erro de conexão.';alertEl.style.display='block';}
+    finally{btn.textContent='Salvar Membro';btn.disabled=false;}
+  }
+
+  function pedirDelete(id,nome){deletandoId=id;document.getElementById('delete-nome').textContent=nome;document.getElementById('modal-delete').classList.add('open');}
+  function fecharDelete(e,force=false){if(force||e.target===document.getElementById('modal-delete'))document.getElementById('modal-delete').classList.remove('open');}
+
+  async function confirmarDelete() {
+    const btn=document.getElementById('btn-delete');btn.textContent='Excluindo…';btn.disabled=true;
+    await fetch(`${API}${deletandoId}/`,{method:'DELETE',headers:{'X-CSRFToken':getCookie('csrftoken')}});
+    fecharDelete(null,true);carregar();btn.textContent='Excluir';btn.disabled=false;
+  }
+
+  carregar();
+</script>
+{% endblock %}

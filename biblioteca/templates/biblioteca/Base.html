@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Biblioteca{% endblock %} — Acervo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --cream-dark: #EDE6D6;
+      --ink: #1A1208;
+      --ink-light: #3D3020;
+      --ink-muted: #6B5E48;
+      --gold: #8B6914;
+      --gold-light: #C9A84C;
+      --gold-pale: #F0E6C8;
+      --rust: #7A3B1E;
+      --teal: #1D5C5C;
+      --teal-light: #2A7A7A;
+      --border: #D4C4A0;
+      --border-dark: #B8A480;
+      --shadow: rgba(26,18,8,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background-color: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.7;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      border-bottom: 3px solid var(--gold);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .logo { display: flex; align-items: baseline; gap: 12px; text-decoration: none; }
+    .logo-mark { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--gold-light); }
+    .logo-sub { font-size: 10px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+
+    .header-right { display: flex; align-items: center; gap: 0; }
+
+    nav { display: flex; align-items: center; }
+    nav a {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); text-decoration: none;
+      padding: 0 16px; height: 68px; display: flex; align-items: center;
+      border-bottom: 3px solid transparent; margin-bottom: -3px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    nav a:hover { color: rgba(255,255,255,0.85); }
+    nav a.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+    /* Botão API Explorer */
+    .btn-api-toggle {
+      margin-left: 16px;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--gold-light); background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3); border-radius: 2px;
+      padding: 7px 14px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-api-toggle:hover { background: rgba(201,168,76,0.18); border-color: rgba(201,168,76,0.5); }
+    .btn-api-toggle .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-light); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    /* ── GUIDED BANNER ── */
+    .guided-banner {
+      background: linear-gradient(135deg, var(--teal) 0%, #0d4040 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .guided-banner-inner {
+      max-width: 1200px; margin: 0 auto; padding: 12px 2rem;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .guided-banner-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .guided-banner-text { flex: 1; }
+    .guided-banner-text strong { font-size: 13px; font-weight: 700; color: white; display: block; }
+    .guided-banner-text span { font-size: 12px; color: rgba(255,255,255,0.65); }
+    .guided-banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .guided-btn {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      text-decoration: none; padding: 6px 14px;
+      border-radius: 2px; transition: all 0.2s; white-space: nowrap;
+    }
+    .guided-btn-primary { background: white; color: var(--teal); border: 1px solid white; }
+    .guided-btn-primary:hover { background: var(--cream); }
+    .guided-btn-outline { background: transparent; color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.3); }
+    .guided-btn-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      background: linear-gradient(135deg, var(--ink) 0%, var(--ink-light) 100%);
+      color: white; padding: 3rem 2rem 2.5rem;
+      border-bottom: 1px solid var(--border-dark); position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(139,105,20,0.03) 60px,rgba(139,105,20,0.03) 61px);
+    }
+    .page-hero-inner { max-width: 1200px; margin: 0 auto; position: relative; }
+    .page-hero .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--gold-light); margin-bottom: 8px; }
+    .page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,3.5vw,2.6rem); font-weight: 400; line-height: 1.2; color: var(--cream); }
+    .page-hero h1 em { font-style: italic; color: var(--gold-light); }
+    .page-hero .subtitle { margin-top: 8px; font-size: 14px; font-weight: 300; color: rgba(255,255,255,0.5); }
+
+    /* ── LAYOUT ── */
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; flex: 1; }
+
+    /* ── ORNAMENT ── */
+    .ornament { display: flex; align-items: center; gap: 12px; margin: 2rem 0; }
+    .ornament-line { flex: 1; height: 1px; background: var(--border); }
+    .ornament-diamond { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+
+    /* ── CARDS ── */
+    .card { background: white; border: 1px solid var(--border); border-radius: 2px; box-shadow: 0 2px 12px var(--shadow); transition: box-shadow 0.25s, transform 0.25s; }
+    .card:hover { box-shadow: 0 8px 32px var(--shadow); transform: translateY(-2px); }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; padding: 10px 20px; border: none; cursor: pointer; transition: all 0.2s; border-radius: 1px; }
+    .btn-primary { background: var(--ink); color: var(--gold-light); border: 1px solid var(--ink); }
+    .btn-primary:hover { background: var(--ink-light); }
+    .btn-outline { background: transparent; color: var(--ink-muted); border: 1px solid var(--border-dark); }
+    .btn-outline:hover { background: var(--cream-dark); color: var(--ink); border-color: var(--ink-muted); }
+    .btn-danger { background: transparent; color: var(--rust); border: 1px solid rgba(122,59,30,0.3); }
+    .btn-danger:hover { background: rgba(122,59,30,0.08); }
+    .btn-gold { background: var(--gold); color: white; border: 1px solid var(--gold); }
+    .btn-gold:hover { background: var(--rust); border-color: var(--rust); }
+    .btn-teal { background: var(--teal); color: white; border: 1px solid var(--teal); }
+    .btn-teal:hover { background: var(--teal-light); }
+
+    /* ── FORM FIELDS ── */
+    .form-group { margin-bottom: 1.4rem; }
+    .form-label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 7px; }
+    .form-control { width: 100%; padding: 10px 13px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--ink); background: white; border: 1px solid var(--border); border-radius: 1px; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+    .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(139,105,20,0.1); }
+    select.form-control { cursor: pointer; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 1px; }
+    .badge-gold { background: var(--gold-pale); color: var(--gold); border: 1px solid rgba(139,105,20,0.2); }
+    .badge-teal { background: rgba(29,92,92,0.08); color: var(--teal); border: 1px solid rgba(29,92,92,0.2); }
+    .badge-rust { background: rgba(122,59,30,0.08); color: var(--rust); border: 1px solid rgba(122,59,30,0.2); }
+    .badge-green { background: rgba(22,101,52,0.08); color: #166534; border: 1px solid rgba(22,101,52,0.2); }
+
+    /* ── ALERTS ── */
+    .alert { padding: 13px 16px; border-left: 3px solid; font-size: 14px; margin-bottom: 1.5rem; border-radius: 0 2px 2px 0; }
+    .alert-success { background: rgba(29,92,92,0.07); border-color: var(--teal); color: var(--teal); }
+    .alert-danger { background: rgba(122,59,30,0.07); border-color: var(--rust); color: var(--rust); }
+
+    /* ── LOADING ── */
+    .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MODAL ── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(26,18,8,0.65); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.25s; }
+    .modal-backdrop.open { opacity: 1; visibility: visible; }
+    .modal { background: var(--cream); border: 1px solid var(--border-dark); border-top: 4px solid var(--gold); border-radius: 2px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.25s; box-shadow: 0 20px 60px rgba(26,18,8,0.3); }
+    .modal-backdrop.open .modal { transform: translateY(0); }
+    .modal-header { padding: 1.5rem 1.75rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 400; }
+    .modal-close { width: 30px; height: 30px; background: none; border: 1px solid var(--border); border-radius: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 18px; transition: background 0.2s; }
+    .modal-close:hover { background: var(--cream-dark); }
+    .modal-body { padding: 1.5rem 1.75rem; }
+    .modal-footer { padding: 1.1rem 1.75rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--ink-muted); }
+    .search-input { width: 100%; padding: 10px 13px 10px 36px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--ink); background: white; border: 1px solid var(--border); border-radius: 1px; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: var(--gold); }
+
+    /* ── API EXPLORER DRAWER ── */
+    .api-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 420px;
+      background: var(--ink); border-left: 2px solid var(--gold);
+      z-index: 200; display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: -8px 0 40px rgba(26,18,8,0.4);
+    }
+    .api-drawer.open { transform: translateX(0); }
+
+    .api-drawer-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .api-drawer-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold-light); }
+    .api-drawer-close { width: 28px; height: 28px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .api-drawer-close:hover { background: rgba(255,255,255,0.12); color: white; }
+
+    .api-drawer-body { flex: 1; overflow-y: auto; padding: 1rem 1.5rem 1.5rem; }
+    .api-drawer-body::-webkit-scrollbar { width: 4px; }
+    .api-drawer-body::-webkit-scrollbar-track { background: transparent; }
+    .api-drawer-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    .api-section-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin: 1.25rem 0 0.75rem; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+    .api-endpoint {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 3px; margin-bottom: 8px; overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .api-endpoint:hover { border-color: rgba(201,168,76,0.3); }
+    .api-endpoint.expanded { border-color: rgba(201,168,76,0.4); }
+
+    .api-endpoint-header { padding: 10px 13px; display: flex; align-items: center; gap: 10px; }
+    .method-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; flex-shrink: 0; font-family: monospace; }
+    .method-get { background: rgba(29,92,92,0.3); color: #5DCAA5; }
+    .method-post { background: rgba(139,105,20,0.3); color: var(--gold-light); }
+    .method-put { background: rgba(42,74,122,0.3); color: #85B7EB; }
+    .method-patch { background: rgba(74,42,122,0.3); color: #AFA9EC; }
+    .method-delete { background: rgba(122,59,30,0.3); color: #F0997B; }
+
+    .api-route { font-family: monospace; font-size: 12px; color: rgba(255,255,255,0.7); flex: 1; }
+    .api-desc { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    .api-endpoint-body { padding: 0 13px 13px; display: none; }
+    .api-endpoint.expanded .api-endpoint-body { display: block; }
+
+    .api-field-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .api-field-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.35); width: 90px; padding-top: 10px; flex-shrink: 0; }
+    .api-field-input { flex: 1; padding: 8px 10px; font-family: monospace; font-size: 12px; color: white; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 2px; outline: none; transition: border-color 0.2s; }
+    .api-field-input:focus { border-color: var(--gold-light); }
+    select.api-field-input { cursor: pointer; }
+
+    .btn-send { width: 100%; padding: 9px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: var(--gold); color: white; border: none; border-radius: 2px; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+    .btn-send:hover { background: #7a5a10; }
+
+    .api-response { margin-top: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; padding: 10px; max-height: 200px; overflow-y: auto; display: none; }
+    .api-response.visible { display: block; }
+    .api-response pre { font-family: monospace; font-size: 11px; color: #5DCAA5; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+    .api-response.error pre { color: #F0997B; }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); background: var(--ink); color: rgba(255,255,255,0.3); text-align: center; padding: 1.5rem 2rem; font-size: 12px; letter-spacing: 1px; }
+    footer span { color: var(--gold-light); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .header-inner { padding: 0 1rem; }
+      nav a { padding: 0 10px; font-size: 10px; }
+      .main-content { padding: 1.5rem 1rem; }
+      .page-hero { padding: 2rem 1rem; }
+      .api-drawer { width: 100%; }
+      .logo-sub { display: none; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <span class="logo-mark">Bibliotheca</span>
+        <span class="logo-sub">Acervo Digital</span>
+      </a>
+      <div class="header-right">
+        <nav>
+          <a href="/" class="{% block nav_index %}{% endblock %}">Início</a>
+          <a href="/livros/" class="{% block nav_livros %}{% endblock %}">Livros</a>
+          <a href="/usuarios/" class="{% block nav_usuarios %}{% endblock %}">Membros</a>
+          <a href="/emprestimos/" class="{% block nav_emprestimos %}{% endblock %}">Empréstimos</a>
+        </nav>
+        <button class="btn-api-toggle" onclick="toggleApi()">
+          <span class="dot"></span> API Docs
+        </button>
+        <a href="/swagger/" target="_blank" style="margin-left:10px; display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.45); text-decoration:none; padding:7px 12px; border:1px solid rgba(255,255,255,0.12); border-radius:2px; transition:all 0.2s;" onmouseover="this.style.color='rgba(255,255,255,0.85)';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='rgba(255,255,255,0.45)';this.style.borderColor='rgba(255,255,255,0.12)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Swagger
+        </a>
+      </div>
+    </div>
+  </header>
+
+  {% block guided_banner %}{% endblock %}
+
+  {% block hero %}{% endblock %}
+
+  <main style="flex:1;">
+    <div class="main-content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer>
+    <span>Bibliotheca</span> — Acervo Digital &nbsp;·&nbsp; Django REST Framework
+  </footer>
+
+  <!-- API EXPLORER DRAWER -->
+  <div class="api-drawer" id="api-drawer">
+    <div class="api-drawer-header">
+      <span class="api-drawer-title">API Explorer</span>
+      <button class="api-drawer-close" onclick="toggleApi()">×</button>
+    </div>
+    <div class="api-drawer-body">
+      <p style="font-size:12px; color:rgba(255,255,255,0.4); line-height:1.6; margin-bottom:4px;">
+        Teste os endpoints da API diretamente aqui. Clique em qualquer rota para expandir.
+      </p>
+
+      <!-- LIVROS -->
+      <div class="api-section-title">Livros</div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="api-route">/api/livros/</span>
+          <span class="api-desc">Listar todos</span>
+        </div>
+        <div class="api-endpoint-body">
+          <button class="btn-send" onclick="sendRequest(this,'GET','/api/livros/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="api-route">/api/livros/{id}/</span>
+          <span class="api-desc">Buscar por ID</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row">
+            <span class="api-field-label">ID</span>
+            <input class="api-field-input" type="number" placeholder="1" data-param="id" />
+          </div>
+          <button class="btn-send" onclick="sendRequest(this,'GET','/api/livros/{id}/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="api-route">/api/livros/</span>
+          <span class="api-desc">Criar livro</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row"><span class="api-field-label">titulo</span><input class="api-field-input" placeholder="Dom Casmurro" data-field="titulo" /></div>
+          <div class="api-field-row"><span class="api-field-label">autor</span><input class="api-field-input" placeholder="Machado de Assis" data-field="autor" /></div>
+          <div class="api-field-row"><span class="api-field-label">isbn</span><input class="api-field-input" placeholder="9788535902778" data-field="isbn" /></div>
+          <div class="api-field-row"><span class="api-field-label">publicado</span><input class="api-field-input" type="date" data-field="publicado_em" /></div>
+          <div class="api-field-row"><span class="api-field-label">usuario_id</span><input class="api-field-input" type="number" placeholder="1" data-field="cadastrado_por" /></div>
+          <button class="btn-send" onclick="sendRequest(this,'POST','/api/livros/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-delete">DELETE</span>
+          <span class="api-route">/api/livros/{id}/</span>
+          <span class="api-desc">Excluir livro</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row"><span class="api-field-label">ID</span><input class="api-field-input" type="number" placeholder="1" data-param="id" /></div>
+          <div class="api-field-row"><span class="api-field-label">usuario_id</span><input class="api-field-input" type="number" placeholder="1" data-field="usuario_id_query" /></div>
+          <button class="btn-send" onclick="sendRequest(this,'DELETE','/api/livros/{id}/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <!-- USUÁRIOS -->
+      <div class="api-section-title">Usuários</div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="api-route">/api/usuarios/</span>
+          <span class="api-desc">Listar membros</span>
+        </div>
+        <div class="api-endpoint-body">
+          <button class="btn-send" onclick="sendRequest(this,'GET','/api/usuarios/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="api-route">/api/usuarios/</span>
+          <span class="api-desc">Criar membro</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row"><span class="api-field-label">nome</span><input class="api-field-input" placeholder="Ana Lima" data-field="nome" /></div>
+          <div class="api-field-row"><span class="api-field-label">email</span><input class="api-field-input" placeholder="ana@email.com" data-field="email" /></div>
+          <button class="btn-send" onclick="sendRequest(this,'POST','/api/usuarios/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <!-- EMPRÉSTIMOS -->
+      <div class="api-section-title">Empréstimos</div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="api-route">/api/emprestimos/</span>
+          <span class="api-desc">Listar todos</span>
+        </div>
+        <div class="api-endpoint-body">
+          <button class="btn-send" onclick="sendRequest(this,'GET','/api/emprestimos/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="api-route">/api/emprestimos/</span>
+          <span class="api-desc">Novo empréstimo</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row"><span class="api-field-label">livro_id</span><input class="api-field-input" type="number" placeholder="1" data-field="livro" /></div>
+          <div class="api-field-row"><span class="api-field-label">usuario_id</span><input class="api-field-input" type="number" placeholder="1" data-field="usuario" /></div>
+          <div class="api-field-row"><span class="api-field-label">devolução</span><input class="api-field-input" type="date" data-field="data_devolucao" /></div>
+          <button class="btn-send" onclick="sendRequest(this,'POST','/api/emprestimos/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+      <div class="api-endpoint" onclick="toggleEndpoint(this)">
+        <div class="api-endpoint-header">
+          <span class="method-badge method-patch">PATCH</span>
+          <span class="api-route">/api/emprestimos/{id}/devolver/</span>
+          <span class="api-desc">Devolver livro</span>
+        </div>
+        <div class="api-endpoint-body">
+          <div class="api-field-row"><span class="api-field-label">ID</span><input class="api-field-input" type="number" placeholder="1" data-param="id" /></div>
+          <button class="btn-send" onclick="sendRequest(this,'PATCH','/api/emprestimos/{id}/devolver/')">Enviar →</button>
+          <div class="api-response"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function getCookie(name) {
+      let v = null;
+      if (document.cookie) {
+        document.cookie.split(';').forEach(c => {
+          c = c.trim();
+          if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+        });
+      }
+      return v;
+    }
+
+    function toggleApi() {
+      document.getElementById('api-drawer').classList.toggle('open');
+    }
+
+    function toggleEndpoint(el) {
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON') return;
+      el.classList.toggle('expanded');
+    }
+
+    async function sendRequest(btn, method, urlTemplate) {
+      const endpoint = btn.closest('.api-endpoint');
+      const responseEl = endpoint.querySelector('.api-response');
+
+      // Resolve params no URL
+      let url = urlTemplate;
+      endpoint.querySelectorAll('[data-param]').forEach(input => {
+        const key = input.dataset.param;
+        url = url.replace(`{${key}}`, input.value || '0');
+      });
+
+      // Monta body
+      const bodyFields = {};
+      const queryFields = {};
+      endpoint.querySelectorAll('[data-field]').forEach(input => {
+        if (input.value) {
+          if (input.dataset.field === 'usuario_id_query') {
+            queryFields['usuario_id'] = input.value;
+          } else {
+            bodyFields[input.dataset.field] = input.value;
+          }
+        }
+      });
+
+      if (Object.keys(queryFields).length) {
+        const qs = new URLSearchParams(queryFields).toString();
+        url = url + '?' + qs;
+      }
+
+      btn.textContent = 'Enviando…';
+      btn.disabled = true;
+
+      try {
+        const opts = {
+          method,
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        };
+        if (['POST','PUT','PATCH'].includes(method) && Object.keys(bodyFields).length) {
+          opts.body = JSON.stringify(bodyFields);
+        }
+
+        const res = await fetch(url, opts);
+        const text = await res.text();
+        let pretty = text;
+        try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch(e) {}
+
+        responseEl.className = 'api-response visible' + (res.ok ? '' : ' error');
+        responseEl.innerHTML = `<pre>${pretty || '204 No Content'}</pre>`;
+      } catch (e) {
+        responseEl.className = 'api-response visible error';
+        responseEl.innerHTML = `<pre>Erro de conexão</pre>`;
+      } finally {
+        btn.textContent = 'Enviar →';
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

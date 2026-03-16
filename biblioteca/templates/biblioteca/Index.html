@@ -1,0 +1,134 @@
+{% extends 'biblioteca/base.html' %}
+{% block title %}Início{% endblock %}
+{% block nav_index %}active{% endblock %}
+
+{% block guided_banner %}
+<div class="guided-banner">
+  <div class="guided-banner-inner">
+    <div class="guided-banner-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+      </svg>
+    </div>
+    <div class="guided-banner-text">
+      <strong>Bem-vindo ao Bibliotheca</strong>
+      <span>Comece cadastrando um membro, depois adicione livros e registre empréstimos.</span>
+    </div>
+    <div class="guided-banner-actions">
+      <a href="/usuarios/" class="guided-btn guided-btn-primary">Cadastrar membro</a>
+      <a href="/livros/" class="guided-btn guided-btn-outline">Ver acervo</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block hero %}
+<section class="page-hero" style="padding:4rem 2rem 3.5rem;">
+  <div class="page-hero-inner">
+    <p class="eyebrow">Sistema de Gestão</p>
+    <h1>O conhecimento bem <em>catalogado</em><br>é conhecimento que chega.</h1>
+    <p class="subtitle">Gerencie o acervo, os membros e os empréstimos em um só lugar.</p>
+    <div style="margin-top:1.75rem; display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="/livros/" class="btn btn-gold">Ver Acervo</a>
+      <a href="/emprestimos/" class="btn btn-outline" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2);">Empréstimos Ativos</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+
+<!-- STATS -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.25rem;margin-bottom:2.5rem;">
+  <div class="card" style="padding:1.4rem 1.6rem;">
+    <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;">Livros no Acervo</p>
+    <p style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:400;color:var(--ink);line-height:1;" id="stat-livros">—</p>
+  </div>
+  <div class="card" style="padding:1.4rem 1.6rem;">
+    <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;">Membros Cadastrados</p>
+    <p style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:400;color:var(--ink);line-height:1;" id="stat-usuarios">—</p>
+  </div>
+  <div class="card" style="padding:1.4rem 1.6rem; border-left:3px solid var(--teal);">
+    <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;">Empréstimos Ativos</p>
+    <p style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:400;color:var(--teal);line-height:1;" id="stat-ativos">—</p>
+  </div>
+  <div class="card" style="padding:1.4rem 1.6rem; border-left:3px solid var(--gold);">
+    <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px;">Já Devolvidos</p>
+    <p style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:400;color:var(--gold);line-height:1;" id="stat-devolvidos">—</p>
+  </div>
+</div>
+
+<div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem;">
+  <!-- Livros recentes -->
+  <div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;margin-bottom:1.25rem;">Adições Recentes</h2>
+    <div id="livros-recentes"><div style="display:flex;align-items:center;gap:10px;color:var(--ink-muted);font-size:14px;"><div class="loading-spinner"></div> Carregando...</div></div>
+    <div style="margin-top:1.25rem;"><a href="/livros/" class="btn btn-outline">Ver todos →</a></div>
+  </div>
+  <!-- Empréstimos ativos -->
+  <div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;margin-bottom:1.25rem;">Empréstimos em Aberto</h2>
+    <div id="emprestimos-recentes"><div style="display:flex;align-items:center;gap:10px;color:var(--ink-muted);font-size:14px;"><div class="loading-spinner"></div> Carregando...</div></div>
+    <div style="margin-top:1.25rem;"><a href="/emprestimos/" class="btn btn-outline">Ver todos →</a></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  async function load() {
+    try {
+      const [lRes, uRes, eRes] = await Promise.all([
+        fetch('/api/livros/'), fetch('/api/usuarios/'), fetch('/api/emprestimos/')
+      ]);
+      const lData = await lRes.json();
+      const uData = await uRes.json();
+      const eData = await eRes.json();
+
+      const livros = lData.results || lData;
+      const usuarios = uData.results || uData;
+      const emprestimos = eData.results || eData;
+      const ativos = emprestimos.filter(e => e.status === 'ativo');
+      const devolvidos = emprestimos.filter(e => e.status === 'devolvido');
+
+      document.getElementById('stat-livros').textContent = lData.count ?? livros.length;
+      document.getElementById('stat-usuarios').textContent = uData.count ?? usuarios.length;
+      document.getElementById('stat-ativos').textContent = ativos.length;
+      document.getElementById('stat-devolvidos').textContent = devolvidos.length;
+
+      // Livros recentes
+      const lEl = document.getElementById('livros-recentes');
+      lEl.innerHTML = livros.slice(-5).reverse().map(l => `
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+          <div style="width:32px;height:44px;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:1px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.titulo}</p>
+            <p style="font-size:11px;color:var(--ink-muted);">${l.autor}</p>
+          </div>
+          <span class="badge badge-gold">${l.publicado_em ? l.publicado_em.substring(0,4) : '—'}</span>
+        </div>`).join('') || '<p style="color:var(--ink-muted);font-size:14px;">Nenhum livro ainda.</p>';
+
+      // Empréstimos ativos
+      const eEl = document.getElementById('emprestimos-recentes');
+      eEl.innerHTML = ativos.slice(0,5).map(e => `
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+          <div style="flex:1;min-width:0;">
+            <p style="font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.livro_titulo}</p>
+            <p style="font-size:11px;color:var(--ink-muted);">${e.usuario_nome}</p>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge badge-teal">Ativo</span>
+            ${e.data_devolucao ? `<p style="font-size:10px;color:var(--ink-muted);margin-top:3px;">Dev. ${new Date(e.data_devolucao+'T00:00:00').toLocaleDateString('pt-BR')}</p>` : ''}
+          </div>
+        </div>`).join('') || '<p style="color:var(--ink-muted);font-size:14px;">Nenhum empréstimo ativo.</p>';
+
+    } catch(e) { console.error(e); }
+  }
+  load();
+</script>
+{% endblock %}
